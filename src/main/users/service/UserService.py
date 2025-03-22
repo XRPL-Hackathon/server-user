@@ -39,7 +39,12 @@ class UserService:
     async def generate_wallet(self, user_id: str):
         wallet = await generate_faucet_wallet(client=client, debug=True)
         wallet_address = wallet.classic_address
-        result = self.user_repository.save_wallet(user_id, wallet_address)
+        wallet_seed = wallet.seed
+        result = self.user_repository.save_wallet(
+            user_id=user_id, 
+            wallet_address=wallet_address,
+            seed=wallet_seed
+        )
         return result
     
     def get_account_info(self, client: JsonRpcClient, address: str, **kwargs) -> dict:
