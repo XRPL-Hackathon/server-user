@@ -16,15 +16,10 @@ botocore = "^1.37.16"
 dotenv = "^0.9.9"
 httpx = "^0.28.1"
 pymongo = "^4.11.3"
-<<<<<<< HEAD
-sqlalchemy = "^2.0.39"
-xrpl-py = "^4.1.0"
-=======
 requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
->>>>>>> a0655f32633b81938852724a40fe98e4df2ebfd7
 
 [build-system]
 requires = ["poetry-core"]

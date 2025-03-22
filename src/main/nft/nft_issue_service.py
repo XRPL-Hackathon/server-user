@@ -13,11 +13,9 @@
 #6. return 값은 void로 하는데 checking 용으로 해보기
 # service/nft_service.py
 
-from src.main.nft.nft_repository import get_users_with_point_over
-#from repository.nft_repository import save_nfts_bulk
 from src.main.nft.nft_model import NFTRecord
 from src.main.nft.nft_Info_dto import NftResponseDTO
-from src.main.users.repository.UserRepository import get_all_user
+from src.main.users.repository.UserRepository import UserRepository
 from src.main.nft.nft_repository import save_nfts_bulk 
 from datetime import datetime, timezone, timedelta
 import asyncio
@@ -46,7 +44,8 @@ import json
 # # 리스트로 묶어서 사용
 # users = [user1, user2, user3]
 
-users = get_all_user()
+repo = UserRepository()
+users = repo.get_all_user()
 
 
 # XRPL 설정
@@ -85,15 +84,15 @@ async def generate_wallet ():
     wallet = await generate_faucet_wallet(client=client)
     return wallet, wallet.address
 
-#포인트별로 필터링 함수
-def filter_users_by_rank_and_point(users, start_idx, end_idx, min_point):
-    return [
-        #전체 사용자 중 
-        # 특정 범위의 사용자 중 최소 포인트 이상인 사람만 필터링해서 반환환
-        user 
-        for i, user in enumerate(users[start_idx:end_idx]) 
-        if user.point >= min_point
-        ]
+# #포인트별로 필터링 함수
+# def filter_users_by_rank_and_point(users, start_idx, end_idx, min_point):
+#     return [
+#         #전체 사용자 중 
+#         # 특정 범위의 사용자 중 최소 포인트 이상인 사람만 필터링해서 반환환
+#         user 
+#         for i, user in enumerate(users[start_idx:end_idx]) 
+#         if user.point >= min_point
+#         ]
 
 # XRPL 기반 NFT 민팅(XRPL 에서 NFT를 실제로 발급(MINt) 하는 핵심 함수)
 # 개별 사용자 1명에게 NFT를 발급하는 함수
@@ -190,11 +189,11 @@ async def mint_all_nfts(users, issuser_wallet, issuserAddr):
         size = max(1, int(total * rule["percent"]))
         # 후보자 필터링(상위 인덱스 구간 내에서 최소 포인트 이상인 유저만)
         # fitler_user_by_rank_and_point(user, start_idx, end_idx, point)
-        candidates = filter_users_by_rank_and_point(
-            users, used_indices, min(used_indices + size, total), rule["min_point"]
-        )
+        # candidates = filter_users_by_rank_and_point(
+        #     users, used_indices, min(used_indices + size, total), rule["min_point"]
+        # )
         # 다음 등급의 start_idx 설정정
-        used_indices += size
+        # used_indices += size
 
         # 후보자 리스트에서 nft 발급 준비
         # mint_nft_on_xrpl(user, grade)
@@ -202,7 +201,8 @@ async def mint_all_nfts(users, issuser_wallet, issuserAddr):
         # for user in candidates :
         #   task = mint_nft_on_xrpl(user, rule["grade"])
         #   tasks.append(task)  
-        tasks = [mint_nft_on_xrpl(user, rule["grade"], issuser_wallet, issuserAddr) for user in candidates]
+        # tasks = [mint_nft_on_xrpl(user, rule["grade"], issuser_wallet, issuserAddr) for user in candidates]
+        tasks = [mint_nft_on_xrpl(user, rule["grade"], issuser_wallet, issuserAddr) for user in users]
         # nft 발급 결과를 비동기식으로 minted에 저장(minted)       
         minted = await asyncio.gather(*tasks) # 위 모든 동작을 동시에 실행행
 
