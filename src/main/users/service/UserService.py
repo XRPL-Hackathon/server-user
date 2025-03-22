@@ -91,51 +91,63 @@ class UserService:
             print(f"Error fetching user from Cognito: {str(e)}")
         
         # MongoDB에서 사용자의 지갑 주소 조회
-        point = 0.0
+        # point = 0.0
+        # total_revenue = 0.0
+        # wallets = self.user_repository.find_wallets_by_user_id(user_id)
+        # if wallets:
+        #     try:
+        #         # 첫 번째 지갑의 잔액 조회
+        #         wallet_address = wallets[0].get('address')
+        #         if wallet_address:
+        #             # XRPL 네트워크에서 계정 정보 조회
+        #             account_info = self.get_account_info(client, wallet_address)
+        #             if account_info and 'result' in account_info:
+        #                 # 잔액 정보 추출
+        #                 balance = account_info['result'].get('account_data', {}).get('Balance', '0')
+        #                 # XRP 단위로 변환 (XRP는 소수점 6자리까지 표현)
+        #                 point = float(balance) / 1000000
+                        
+        #             # 계정의 거래 내역 조회
+        #             transactions = self.get_account_transactions(client, wallet_address)
+                    
+        #             # 사용자가 받은 모든 금액 합산 (수익)
+        #             for tx in transactions:
+        #                 # 트랜잭션이 '지불' 타입이고, 이 지갑이 수취인인 경우
+        #                 if (tx.get('tx', {}).get('TransactionType') == 'Payment' and 
+        #                     tx.get('tx', {}).get('Destination') == wallet_address):
+        #                     # 지불된 금액 추출 (delivered_amount 또는 Amount 사용)
+        #                     delivered_amount = tx.get('meta', {}).get('delivered_amount')
+        #                     amount = tx.get('tx', {}).get('Amount')
+                            
+        #                     # 실제 받은 금액 계산
+        #                     received_amount = 0
+        #                     if delivered_amount and isinstance(delivered_amount, str):
+        #                         received_amount = float(delivered_amount) / 1000000
+        #                     elif amount and isinstance(amount, str):
+        #                         received_amount = float(amount) / 1000000
+                                
+        #                     total_revenue += received_amount
+                    
+        #     except Exception as e:
+        #         print(f"Error fetching data from XRPL: {str(e)}")
+
+        # nft_grade, point, total_revenue 조회 -> 모두 `wallets` 컬렉션에서 조회
         total_revenue = 0.0
+        point = 0.0
+        nft_grade = "조회되지 않음"
+
         wallets = self.user_repository.find_wallets_by_user_id(user_id)
         if wallets:
-            try:
-                # 첫 번째 지갑의 잔액 조회
-                wallet_address = wallets[0].get('address')
-                if wallet_address:
-                    # XRPL 네트워크에서 계정 정보 조회
-                    account_info = self.get_account_info(client, wallet_address)
-                    if account_info and 'result' in account_info:
-                        # 잔액 정보 추출
-                        balance = account_info['result'].get('account_data', {}).get('Balance', '0')
-                        # XRP 단위로 변환 (XRP는 소수점 6자리까지 표현)
-                        point = float(balance) / 1000000
-                        
-                    # 계정의 거래 내역 조회
-                    transactions = self.get_account_transactions(client, wallet_address)
-                    
-                    # 사용자가 받은 모든 금액 합산 (수익)
-                    for tx in transactions:
-                        # 트랜잭션이 '지불' 타입이고, 이 지갑이 수취인인 경우
-                        if (tx.get('tx', {}).get('TransactionType') == 'Payment' and 
-                            tx.get('tx', {}).get('Destination') == wallet_address):
-                            # 지불된 금액 추출 (delivered_amount 또는 Amount 사용)
-                            delivered_amount = tx.get('meta', {}).get('delivered_amount')
-                            amount = tx.get('tx', {}).get('Amount')
-                            
-                            # 실제 받은 금액 계산
-                            received_amount = 0
-                            if delivered_amount and isinstance(delivered_amount, str):
-                                received_amount = float(delivered_amount) / 1000000
-                            elif amount and isinstance(amount, str):
-                                received_amount = float(amount) / 1000000
-                                
-                            total_revenue += received_amount
-                    
-            except Exception as e:
-                print(f"Error fetching data from XRPL: {str(e)}")
+            for wallet in wallets:
+                total_revenue += wallet.get('total_revenue', 0.0)
+                point += wallet.get('point', 0.0)
+                nft_grade = wallet.get('nft_grade', "조회되지 않음")
             
         # 응답 객체 생성 및 반환
         user_info = UserInfoResponse(
             user_id=user_id,
             nickname=nickname,
-            level_title="조회되지 않음",  # 요구사항에 따라 하드코딩
+            level_title=nft_grade,
             point=point,  # XRPL 계정 잔액으로 설정
             total_revenue=total_revenue  # 계산된 총 수익
         )
