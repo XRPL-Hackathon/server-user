@@ -36,10 +36,6 @@ class UserService:
             return {"message": "No wallets found for this user"}
         return wallets
     
-<<<<<<< HEAD
-    def add_wallet(self, user_id: str, wallet_address: str):
-        return self.user_repository.create_or_update_wallet(user_id, wallet_address, point=0)
-=======
     async def generate_wallet(self, user_id: str):
         wallet = await generate_faucet_wallet(client=client, debug=True)
         wallet_address = wallet.classic_address
@@ -159,4 +155,3 @@ class UserService:
         )
         
         return user_info
->>>>>>> 19032c68133e3e96007ea5d383a7774dbbd2005e

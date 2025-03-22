@@ -17,7 +17,9 @@ class UserRepository:
         if existing:
             self.wallets_collection.update_one(
                 {"user_id": user_id}, 
-                {"$set": {"address": wallet_address}}
+                {"$set": {"address": wallet_address,
+                          "point": point,
+                          "nft_grade": nft_grade}}
             )
             return {"message": "Wallet updated", 
                     "user_id": user_id, 
