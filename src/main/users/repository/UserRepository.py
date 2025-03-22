@@ -17,8 +17,8 @@ class UserRepository:
         if existing_wallet:
             self.wallets_collection.update_one({"user_id": user_id}, 
                                                {"$set": {"address": wallet_address}})
-            return {"message": "Wallet updated", "user_id": user_id, "wallet_address": wallet_address}
+            return {"message": "Wallet updated", "user_id": user_id, "wallet_address": wallet_address, "point": existing_wallet.get("point", 0)}
         
         else:
-            self.wallets_collection.insert_one({"user_id": user_id, "address": wallet_address})
-            return {"message": "Wallet created", "user_id": user_id, "wallet_address": wallet_address}
+            self.wallets_collection.insert_one({"user_id": user_id, "address": wallet_address, "point": 0})
+            return {"message": "Wallet created", "user_id": user_id, "wallet_address": wallet_address, "point": 0}
