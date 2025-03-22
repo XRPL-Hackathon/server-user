@@ -17,6 +17,7 @@ dotenv = "^0.9.9"
 httpx = "^0.28.1"
 pymongo = "^4.11.3"
 requests = "^2.32.3"
+xrpl-py = "^4.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
