@@ -14,5 +14,5 @@ class NFTRecord(Base):
     nft_grade = Column(String, nullable=False)
     transaction_hash = Column(String, unique=True, nullable=False)
     nft_metadata_uri = Column(String, nullable=True)
-    issued_at = Column(DateTime, default=datetime.datetime.utcnow)
-    expires_at = Column(DateTime, nullable=True)
+    issued_at = Column(DateTime, nullable=False)
+    expires_at = Column(DateTime, nullable=False)

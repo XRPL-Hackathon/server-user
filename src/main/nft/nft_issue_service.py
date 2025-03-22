@@ -17,6 +17,8 @@ from src.main.nft.nft_repository import get_users_with_point_over
 #from repository.nft_repository import save_nfts_bulk
 from src.main.nft.nft_model import NFTRecord
 from src.main.nft.nft_Info_dto import NftResponseDTO
+from src.main.users.repository.UserRepository import get_all_user
+from src.main.nft.nft_repository import save_nfts_bulk 
 from datetime import datetime, timezone, timedelta
 import asyncio
 
@@ -31,18 +33,20 @@ import json
 
 # service 내부에서 임시 유저 생성
 # 예시 User 클래스 (있다고 가정)
-class User:
-    def __init__(self, wallet, point):
-        self.wallet = wallet
-        self.point = point
+# class User:
+#     def __init__(self, wallet, point):
+#         self.wallet = wallet
+#         self.point = point
 
-# 개별 사용자 생성
-user1 = User(wallet="rWallet1", point=1800)
-user2 = User(wallet="rWallet2", point=1300)
-user3 = User(wallet="rWallet3", point=800)
+# # 개별 사용자 생성
+# user1 = User(wallet="rWallet1", point=1800)
+# user2 = User(wallet="rWallet2", point=1300)
+# user3 = User(wallet="rWallet3", point=800)
 
-# 리스트로 묶어서 사용
-users = [user1, user2, user3]
+# # 리스트로 묶어서 사용
+# users = [user1, user2, user3]
+
+users = get_all_user()
 
 
 # XRPL 설정
@@ -209,12 +213,15 @@ async def mint_all_nfts(users, issuser_wallet, issuserAddr):
     return results
 
 # 전체 로직
-'''
-async def process_nft_issuance_with_response(session) -> list[NftResponseDTO]:
-    users = get_users_with_point_over(session, 500)
-    users.sort(key=lambda u: u.point, reverse=True)
 
-    mint_results = await mint_all_nfts(users)
+async def process_nft_issuance_with_response() -> list[NftResponseDTO]:
+    issuser_wallet, issuserAddr = await generate_wallet()
+
+    # 포인트 별로 내림차순순
+    users.sort(key=lambda u: u.point, reverse=True)
+    
+    # 모든 사용자 nft 발급 요청하기
+    mint_results = await mint_all_nfts(users, issuser_wallet, issuserAddr)
 
     # DB 저장용 객체 변환
     nft_records = [
@@ -228,7 +235,7 @@ async def process_nft_issuance_with_response(session) -> list[NftResponseDTO]:
             expires_at=result["expired_at"]
         ) for result in mint_results
     ]
-    save_nfts_bulk(session, nft_records)
+    save_nfts_bulk(nft_records)
 
     # DTO 변환
     return [
@@ -243,27 +250,27 @@ async def process_nft_issuance_with_response(session) -> list[NftResponseDTO]:
             expired_at=r["expired_at"]
         ) for r in mint_results
     ]
-'''
 
-async def test_process_nft_issuance_without_db() -> list[NftResponseDTO]:
-    issuser_wallet, issuserAddr = await generate_wallet()
 
-    # 포인트 별로 내림차순순
-    users.sort(key=lambda u: u.point, reverse=True)
-    # 모든 사용자 nft 발급 요청하기
-    mint_results = await mint_all_nfts(users, issuser_wallet, issuserAddr)
+# async def test_process_nft_issuance_without_db() -> list[NftResponseDTO]:
+#     issuser_wallet, issuserAddr = await generate_wallet()
 
-    return [
-        NftResponseDTO(
-            user_wallet_id=r["user_wallet"],
-            point=r["point"],
-            nft_id=r["nft_id"],
-            nft_grade=r["nft_grade"],
-            transaction_hash=r["transaction_hash"],
-            nft_metadata_uri=r["nft_metadata_uri"],
-            issued_at=r["issued_at"],
-            expired_at=r["expired_at"]
-        )
-        for r in mint_results
-    ]
+#     # 포인트 별로 내림차순순
+#     users.sort(key=lambda u: u.point, reverse=True)
+#     # 모든 사용자 nft 발급 요청하기
+#     mint_results = await mint_all_nfts(users, issuser_wallet, issuserAddr)
+
+#     return [
+#         NftResponseDTO(
+#             user_wallet_id=r["user_wallet"],
+#             point=r["point"],
+#             nft_id=r["nft_id"],
+#             nft_grade=r["nft_grade"],
+#             transaction_hash=r["transaction_hash"],
+#             nft_metadata_uri=r["nft_metadata_uri"],
+#             issued_at=r["issued_at"],
+#             expired_at=r["expired_at"]
+#         )
+#         for r in mint_results
+#     ]
 
