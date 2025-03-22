@@ -1,6 +1,7 @@
 import uuid
 from fastapi import APIRouter, Depends
 from src.main.auth.dependencies import get_current_user
+from src.main.users.dto.UserInfoDto import UserInfoResponse
 from src.main.users.service.UserService import UserService
 
 router = APIRouter(
@@ -23,3 +24,10 @@ async def create_wallet(
     user_service: UserService = Depends()
 ):
     return await user_service.generate_wallet(str(user_id))
+
+@router.get("", response_model=UserInfoResponse)
+async def get_user_info(
+    user_id: uuid.UUID = Depends(get_current_user),
+    user_service: UserService = Depends()
+):
+    return user_service.get_user_info(str(user_id))
