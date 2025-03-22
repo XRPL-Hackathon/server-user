@@ -1,6 +1,6 @@
 from xrpl.clients import JsonRpcClient
 from xrpl.asyncio.wallet import generate_faucet_wallet
-from xrpl.models.requests import AccountInfo, AccountTx
+from xrpl.models.requests import AccountInfo, AccountTx, AccountLines
 from xrpl.utils import xrp_to_drops
 from src.main.users.repository.UserRepository import UserRepository
 import boto3
@@ -12,6 +12,9 @@ load_dotenv()
 
 TESTNET_URL = "https://s.altnet.rippletest.net:51234"
 client = JsonRpcClient(TESTNET_URL)
+RLUSD_ISSUER = "rU3PzMJYPWXbkWZ2ze9dXzE9SG33uXqpWA"
+RLUSD_CURRENCY = "RLUSD"
+
 class UserService:
     def __init__(self):
         self.user_repository = UserRepository()
@@ -29,6 +32,28 @@ class UserService:
                 'cognito-idp',
                 region_name=os.environ.get('AWS_REGION', 'ap-northeast-2')
             )
+
+    def get_user_assets(self, wallet_address: str) -> tuple[float, float]:
+        try:
+            account_info = self.get_account_info(client, wallet_address)
+            xrp_drops = account_info.result.get("account_data", {}).get("Balance", "0")
+            xrp_balance = float(xrp_drops) / 1_000_000  # XRP 변환
+
+            from xrpl.models.requests import AccountLines
+            account_lines = client.request(AccountLines(account=wallet_address))
+            trust_lines = account_lines.result.get("lines", [])
+
+            rlusd_balance = 0.0
+            for line in trust_lines:
+                if line.get("currency") == "RLUSD":
+                    rlusd_balance = float(line.get("balance", "0"))
+                    break
+
+            return xrp_balance, rlusd_balance
+
+        except Exception as e:
+            print(f"[ERROR] Failed to get user assets: {e}")
+            return 0.0, 0.0
     
     def get_wallets(self, user_id: str):
         wallets = self.user_repository.find_wallets_by_user_id(user_id)
@@ -142,9 +167,15 @@ class UserService:
         total_revenue = 0.0
         point = 0.0
         nft_grade = "브론즈"
+        xrp_balance = 0.0
+        rlusd_balance = 0.0
 
         wallets = self.user_repository.find_wallets_by_user_id(user_id)
         if wallets:
+            first_wallet = wallets[0]
+            wallet_address = first_wallet.get("address")
+            xrp_balance, rlusd_balance = self.get_user_assets(wallet_address)
+
             for wallet in wallets:
                 total_revenue += wallet.get('total_revenue', 0.0)
                 point += wallet.get('point', 0.0)
@@ -156,7 +187,9 @@ class UserService:
             nickname=nickname,
             level_title=nft_grade,
             point=point,  # XRPL 계정 잔액으로 설정
-            total_revenue=total_revenue  # 계산된 총 수익
+            total_revenue=total_revenue,  # 계산된 총 수익
+            xrp_balance=xrp_balance,
+            rlusd_balance=rlusd_balance 
         )
         
         return user_info
