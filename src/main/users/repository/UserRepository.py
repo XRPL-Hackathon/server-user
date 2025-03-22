@@ -1,5 +1,6 @@
 from typing import Optional
 from src.main.config.mongodb import get_mongo_client
+from src.main.nft.nft_Info_dto import User
 
 class UserRepository:
     def __init__(self):
@@ -22,3 +23,9 @@ class UserRepository:
         else:
             self.wallets_collection.insert_one({"user_id": user_id, "address": wallet_address, "point": 0})
             return {"message": "Wallet created", "user_id": user_id, "wallet_address": wallet_address, "point": 0}
+        
+    
+    def get_all_user(self) -> list[User]:
+        docs = self.wallets_collection.find({}, {"id":0, "address":1, "point": 1})
+        users = [User(wallect=doc["address"], point=doc.get("point", 0)) for doc in docs]
+        return users
