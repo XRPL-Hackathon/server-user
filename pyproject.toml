@@ -9,15 +9,22 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.115.11"
-uvicorn = "^0.34.0"
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
 pytest = "^8.3.5"
 boto3 = "^1.37.16"
 botocore = "^1.37.16"
 dotenv = "^0.9.9"
 httpx = "^0.28.1"
 pymongo = "^4.11.3"
+<<<<<<< HEAD
 sqlalchemy = "^2.0.39"
 xrpl-py = "^4.1.0"
+=======
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+>>>>>>> a0655f32633b81938852724a40fe98e4df2ebfd7
 
 [build-system]
 requires = ["poetry-core"]
