@@ -22,4 +22,6 @@ jobs:
       id: run-test
       run: |
         docker run --rm \
+          -e ENV=local \
+          -e MONGODB_URL=mongodb://host.docker.internal:27017/xrpedia \
           ${{ env.TEST_IMAGE_NAME }}
