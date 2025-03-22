@@ -12,17 +12,28 @@ class UserRepository:
         wallets = list(self.wallets_collection.find({"user_id": user_id}, {"_id": 0}))
         return wallets if wallets else []
     
-    def create_or_update_wallet(self, user_id: str, wallet_address: str, point:int = 0) -> dict:
-        existing_wallet = self.wallets_collection.find_one({"user_id": user_id})
-
-        if existing_wallet:
-            self.wallets_collection.update_one({"user_id": user_id}, 
-                                               {"$set": {"address": wallet_address}})
-            return {"message": "Wallet updated", "user_id": user_id, "wallet_address": wallet_address, "point": existing_wallet.get("point", 0)}
-        
+    def save_wallet(self, user_id: str, wallet_address: str, point: int = 0, nft_grade: str = "bronze"):
+        existing = self.wallets_collection.find_one({"user_id": user_id})
+        if existing:
+            self.wallets_collection.update_one(
+                {"user_id": user_id}, 
+                {"$set": {"address": wallet_address}}
+            )
+            return {"message": "Wallet updated", 
+                    "user_id": user_id, 
+                    "wallet_address": wallet_address,
+                    "point": point,
+                    "nft_grade": nft_grade}
         else:
-            self.wallets_collection.insert_one({"user_id": user_id, "address": wallet_address, "point": 0})
-            return {"message": "Wallet created", "user_id": user_id, "wallet_address": wallet_address, "point": point}
+            self.wallets_collection.insert_one({"user_id": user_id, 
+                                                "address": wallet_address,
+                                                "point": point,
+                                                "nft_grade": nft_grade})
+            return {"message": "Wallet created", 
+                    "user_id": user_id, 
+                    "wallet_address": wallet_address,
+                    "point": point,
+                    "nft_grade": nft_grade}
         
     
     def get_all_user(self) -> list[User]:

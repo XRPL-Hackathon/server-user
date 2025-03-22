@@ -4,17 +4,15 @@
 # BASE_URL = "http://localhost:8081" #"https://5erhg0u08g.execute-api.ap-northeast-2.amazonaws.com"
 
 # TEST_USER_ID = "11111111-2222-3333-4444-555555555555" # str(uuid.uuid4())
-# TEST_WALLET_ADDRESS = "rEXTERNALTESTWALLET123"
 
 # headers = {
 #     "x-auth-sub": TEST_USER_ID  # 추후에 삭제할 부분
 # }
 
 # # 지갑 생성 또는 업데이트 (POST /users/wallets)
-# def test_create_or_update_wallet():
+# def test_create_wallet():
 #     response = requests.post(
 #         f"{BASE_URL}/users/wallets",
-#         json={"wallet_address": TEST_WALLET_ADDRESS},
 #         headers=headers
 #     )
 
@@ -22,7 +20,7 @@
 
 #     assert response.status_code == 200, f"Unexpected status: {response.status_code}, response: {response.text}"
 #     data = response.json()
-#     assert data["wallet_address"] == TEST_WALLET_ADDRESS
+#     assert "wallet_address" in data
 #     assert data["user_id"] == TEST_USER_ID
 #     assert data["message"] in ["Wallet created", "Wallet updated"]
 
@@ -37,4 +35,4 @@
 #         assert data["message"] == "No wallets found for this user"
 #     else:
 #         assert isinstance(data, list)
-#         assert any(wallet["address"] == TEST_WALLET_ADDRESS for wallet in data)
+#         assert any("address" in wallet and wallet["address"].startswith("r") for wallet in data)
