@@ -15,18 +15,20 @@ client = JsonRpcClient(TESTNET_URL)
 class UserService:
     def __init__(self):
         self.user_repository = UserRepository()
+        self.user_pool_id = os.environ.get('COGNITO_USER_POOL_ID', '')
         if os.environ.get('ENV') == 'local-profile':
-            self.cognito_client = boto3.client(
-                'cognito-idp',
-                region_name=os.environ.get('AWS_REGION', 'ap-northeast-2'),
+            session = boto3.Session(
                 profile_name=os.environ.get('AWS_PROFILE', 'default')
+            )
+            self.cognito_client = session.client(
+                'cognito-idp',
+                region_name=os.environ.get('AWS_REGION', 'ap-northeast-2')
             )
         else:
             self.cognito_client = boto3.client(
                 'cognito-idp',
                 region_name=os.environ.get('AWS_REGION', 'ap-northeast-2')
             )
-            self.user_pool_id = os.environ.get('COGNITO_USER_POOL_ID', '')
     
     def get_wallets(self, user_id: str):
         wallets = self.user_repository.find_wallets_by_user_id(user_id)
