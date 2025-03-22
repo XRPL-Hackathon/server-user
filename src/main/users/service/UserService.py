@@ -141,14 +141,14 @@ class UserService:
         # nft_grade, point, total_revenue 조회 -> 모두 `wallets` 컬렉션에서 조회
         total_revenue = 0.0
         point = 0.0
-        nft_grade = "조회되지 않음"
+        nft_grade = "브론즈"
 
         wallets = self.user_repository.find_wallets_by_user_id(user_id)
         if wallets:
             for wallet in wallets:
                 total_revenue += wallet.get('total_revenue', 0.0)
                 point += wallet.get('point', 0.0)
-                nft_grade = wallet.get('nft_grade', "조회되지 않음")
+                nft_grade = wallet.get('nft_grade', "브론즈")
             
         # 응답 객체 생성 및 반환
         user_info = UserInfoResponse(
