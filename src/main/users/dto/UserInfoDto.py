@@ -6,3 +6,5 @@ class UserInfoResponse(BaseModel):
     level_title: str
     point: float
     total_revenue: float
+    xrp_balance: float
+    rlusd_balance: float
